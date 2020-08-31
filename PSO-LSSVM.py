@@ -22,10 +22,9 @@ def lssvm_train(s, C):
 
     for i in range(n_train):
         for j in range(i,n_train,1):
-            if i <= j:
-                temp = np.subtract(X_train[i],X_train[j])
-                Om[i + 1,j + 1] = np.exp(-1 * np.dot(temp,temp) / s**2)
-                Om[j + 1,i + 1] = Om[i + 1,j + 1]
+            temp = np.subtract(X_train[i],X_train[j])
+            Om[i + 1,j + 1] = np.exp(-1 * np.dot(temp,temp) / s**2)
+            Om[j + 1,i + 1] = Om[i + 1,j + 1]
             if i == j:
                 Om[i + 1,j + 1] += C
                 
@@ -56,9 +55,9 @@ def lssvm_train(s, C):
             
         ls /= n_train
         
-        return ls, Om
+        return ls
     else:
-        return float('inf'), Om
+        return float('inf')
 
 #=================================================================
 
@@ -87,17 +86,11 @@ def PSO():
 
     iteration = 0
 
-    same = 0
-    pre_err = 0
-    
-    om = []
-    OM = []
-
     while iteration < n_iteration:
         for i in range(n_particles):
-            fit_val, om = lssvm_train(p_pos[i][0],p_pos[i][1])
+            fit_val = lssvm_train(p_pos[i][0],p_pos[i][1])
 
-            if fit_val == float('inf') or (p_pos[i][0] > 10 and p_pos[i][0] < 0.1):
+            if fit_val == float('inf') or p_pos[i][0] > 10 or p_pos[i][0] < 0.1:
                 continue
                 
             if p_best_val[i] > fit_val:
@@ -107,12 +100,11 @@ def PSO():
             if g_best_val > fit_val:
                 g_best_val = fit_val
                 g_best_pos = p_pos[i]
-                OM = om.copy()
 
         if g_best_val == float('inf'):
-            iteration = 0
-            p_pos = np.array([np.array([rd.uniform(1,-1), rd.uniform(10,0.1)]) for _ in range(n_particles)])
             continue
+
+        print("\n#" + str(iteration) + " Train Result\nerror =", g_best_val,"\ns =",g_best_pos[0],"\nC =",g_best_pos[1],"\n")
 
         for i in range(n_particles):
             new_vel = (w*vel[i]) + (c1*rd.random()*(p_best_pos[i] - p_pos[i])) + (c2*rd.random()*(g_best_pos - p_pos[i]))
@@ -122,9 +114,6 @@ def PSO():
 
         w = 0.9 - (iteration/n_iteration)*0.5
         iteration += 1
-        
-        print("\n#" + str(iteration) + " Train Result\nerror =", g_best_val,"\ns =",g_best_pos[0],"\nC =",g_best_pos[1],"\n")
-        #print(OM)
         
     s = g_best_pos[0]
     C = g_best_pos[1]
@@ -143,10 +132,9 @@ def set():
 
     for i in range(n_train):
         for j in range(i,n_train,1):
-            if i <= j:
-                temp = np.subtract(X_train[i],X_train[j])
-                Om[i + 1,j + 1] = np.exp(-1 * np.dot(temp,temp) / s**2)
-                Om[j + 1,i + 1] = Om[i + 1,j + 1]
+            temp = np.subtract(X_train[i],X_train[j])
+            Om[i + 1,j + 1] = np.exp(-1 * np.dot(temp,temp) / s**2)
+            Om[j + 1,i + 1] = Om[i + 1,j + 1]
             if i == j:
                 Om[i + 1,j + 1] += C
 
